@@ -1,0 +1,1 @@
+# get_rich_quick
