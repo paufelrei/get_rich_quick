@@ -38,6 +38,8 @@ def get_table(date):
 
     table = soup.find_all('table')[0]
 
+    lst_dct = []
+
     for row in table.findAll("tr"):
         cell = row.findAll("td")
         str_cells = str(cell )
@@ -53,8 +55,26 @@ def get_table(date):
                 item = item.replace("]", "")
                 a.append(item.strip())
 
+            dct_row = {"name": a[3],"placement": int(a[0]), "matches": int(a[4]), "draws":int(a[6]), "losses":int(a[7]),
+                       "goals_diff":int(a[9]), "points": int(a[10])}
 
-        print("____________________________________________________________________________________________")
+            wins = dct_row["matches"] - dct_row["draws"] - dct_row["losses"]
+
+            dct_row["wins"] = wins
+
+            goals = a[8].split(':')
+
+            dct_row["goals_shot"] = goals[0]
+            dct_row["goals_received"] = goals[1]
+
+
+
+            lst_dct.append(dct_row)
+
+    df_return = pd.DataFrame(lst_dct)
+
+    return df_return
+
 
 
 
