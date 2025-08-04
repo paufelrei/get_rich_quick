@@ -14,11 +14,11 @@ def webscraper():
     print("started webscraping")
     date = "2022-23/3"
 
-    get_table(date)
+    get_match_day_data(date)
 
 
 
-def get_table(date):
+def get_match_day_data(date):
     #response = requests.get(f'http://www.kicker.de')
 
     driver = webdriver.Firefox()
@@ -36,6 +36,7 @@ def get_table(date):
     html_source_code = driver.execute_script("return document.body.innerHTML;")
     soup = BeautifulSoup(html_source_code, 'html.parser')
 
+    # first table are the placings, second table are the match day results
     table = soup.find_all('table')[0]
 
     lst_dct = []
@@ -71,9 +72,32 @@ def get_table(date):
 
             lst_dct.append(dct_row)
 
-    df_return = pd.DataFrame(lst_dct)
+    df_return_placing = pd.DataFrame(lst_dct)
 
-    return df_return
+    # results
+    # first table are the placings, second table are the match day results
+    results = soup.find_all(attrs={"class": "kick__v100-gameCell kick__v100-gameCell--standard"})
+
+    lst_dct =[]
+    for match in results:
+        teams = match.find_all(attrs={"class": "kick__v100-gameCell__team__shortname"})
+
+        team_1 = teams[0].text
+        team_2 = teams[1].text
+
+        goals_scored = match.find_all(attrs={"class": "kick__v100-scoreBoard__scoreHolder__score"})
+
+        score_team_1 = int(goals_scored[0].text)
+        score_team_2 = int(goals_scored[1].text)
+
+        dct_row = {"team_1": team_1, "team_2":team_1, "score_team_1": score_team_1, "score_team_2": score_team_2}
+        lst_dct.append(dct_row)
+
+    df_return_results = pd.DataFrame(lst_dct)
+
+    return df_return_placing, df_return_results
+
+
 
 
 
