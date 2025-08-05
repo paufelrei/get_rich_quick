@@ -90,10 +90,31 @@ def get_match_day_data(date):
         score_team_1 = int(goals_scored[0].text)
         score_team_2 = int(goals_scored[1].text)
 
-        dct_row = {"team_1": team_1, "team_2":team_1, "score_team_1": score_team_1, "score_team_2": score_team_2}
+        dct_row = {"team_1": team_1, "team_2":team_2, "score_team_1": score_team_1, "score_team_2": score_team_2}
         lst_dct.append(dct_row)
 
     df_return_results = pd.DataFrame(lst_dct)
+
+    # get wins, losses and ties here
+    lst_wlt_team1 = []
+    lst_wlt_team2 = []
+
+    for nr, row in df_return_results.iterrows():
+        score_team_1 = row["score_team_1"]
+        score_team_2 = row["score_team_2"]
+
+        if score_team_1 > score_team_2:
+            lst_wlt_team1.append(1)
+            lst_wlt_team2.append(-1)
+        elif score_team_1 < score_team_2:
+            lst_wlt_team1.append(-1)
+            lst_wlt_team2.append(1)
+        else:
+            lst_wlt_team1.append(0)
+            lst_wlt_team2.append(0)
+
+    df_return_results["outcome_team_1"] = lst_wlt_team1
+    df_return_results["outcome_team_2"] = lst_wlt_team2
 
     return df_return_placing, df_return_results
 
