@@ -3,6 +3,8 @@
 import requests
 import time
 
+from datetime import datetime
+
 import pandas as pd
 
 from selenium import webdriver
@@ -12,10 +14,42 @@ def webscraper():
     # this function will get the data from kicker.de
     # as of 14.07.2025 kicker.de/robots.txt does not disallow www.kicker.de/bundesliga/tabelle
     print("started webscraping")
-    date = "2022-23/3"
 
-    get_match_day_data(date)
+    # get date strings
+    today = datetime.today().strftime('%Y')
 
+    lst_below_2000 = list(range(1963,2000))
+    lst_below_2010 =  list(range(2000,2010))
+    lst_rest = list(range(2010, int(today) + 2))
+
+    lst_below_2000 = [str(item) for item in lst_below_2000] + ["00"]
+    lst_below_2010 = ["0" + str(item) for item in lst_below_2010]
+    lst_rest = [str(item) for item in lst_rest]
+
+    lst_dates = lst_below_2000 + lst_below_2010 + lst_rest
+
+    # get dicts for dfs
+    dct_placing = {}
+    dct_results = {}
+
+    for i in range(1, len(lst_dates)):
+        for j in range(1,35):
+            print(f"{lst_dates[i-1]}-{lst_dates[i][2:]}/{j}" )
+
+            date = f"{lst_dates[i-1]}-{lst_dates[i][2:]}/{j}"
+
+            df_return_placing, df_return_results = get_match_day_data(date)
+
+            dct_placing[date] = df_return_placing
+            dct_placing[date] = df_return_results
+
+    with open('dct_placing.pkl', 'wb') as f:  # open a text file
+        pickle.dump(dct_placing, f)
+
+    with open('dct_results.pkl', 'wb') as f:  # open a text file
+        pickle.dump(dct_results, f)
+
+    return dct_placing, dct_results
 
 
 def get_match_day_data(date):
