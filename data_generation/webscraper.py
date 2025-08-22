@@ -8,6 +8,7 @@ from datetime import datetime
 import pandas as pd
 
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from bs4 import BeautifulSoup
 
 def webscraper():
@@ -18,7 +19,7 @@ def webscraper():
     # get date strings
     today = datetime.today().strftime('%Y')
 
-    lst_below_2000 = list(range(1963,2000))
+    lst_below_2000 = list(range(1995,2000))
     lst_below_2010 =  list(range(2000,2010))
     lst_rest = list(range(2010, int(today) + 2))
 
@@ -54,14 +55,16 @@ def webscraper():
 
 def get_match_day_data(date):
     #response = requests.get(f'http://www.kicker.de')
+    options = Options()
 
-    driver = webdriver.Firefox()
+    options.add_argument("-headless")
+    driver = webdriver.Firefox(options=options)
 
     # Load the URL
-    url = f"https://www.kicker.de/bundesliga/tabelle/2022-23/3"
+    url = f"https://www.kicker.de/bundesliga/tabelle/{date}"
     driver.get(url)
 
-    time.sleep(3)
+    time.sleep(5)
 
     # click the banner
     driver.find_element('xpath', '/html/body/div[1]/div[2]/div/div/div/div/div/div[3]/div[1]/div/a').click()
@@ -69,6 +72,10 @@ def get_match_day_data(date):
     # get soup object and extract data
     html_source_code = driver.execute_script("return document.body.innerHTML;")
     soup = BeautifulSoup(html_source_code, 'html.parser')
+
+    # quit webdriver
+    driver.quit()
+
 
     # first table are the placings, second table are the match day results
     table = soup.find_all('table')[0]
